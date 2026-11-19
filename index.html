@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ta-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mains Quants Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: exam-portal calm. Fixed left rail of sub-topics, one white reading column, one question per screen. */
+:root{
+  color-scheme: light;
+  --paper:#ffffff;
+  --wash:#f5f7fa;
+  --ink:#131a26;
+  --muted:#5a6577;
+  --line:#e3e7ee;
+  --accent:#1d4fd7;
+  --accent-wash:#edf2ff;
+  --good:#0f7a55;
+  --good-wash:#e9f7f1;
+  --bad:#c2372d;
+  --bad-wash:#fdeeec;
+  --warn:#9a6200;
+  --warn-wash:#fff5df;
+  --display:"Bricolage Grotesque","Figtree",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.2}
+.num{font-variant-numeric:tabular-nums}
+
+.app{display:grid;grid-template-columns:288px minmax(0,1fr);min-height:100%}
+.rail{border-right:1px solid var(--line);background:var(--wash);padding:22px 16px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{display:flex;flex-direction:column;gap:2px;padding:0 6px}
+.brand b{font-family:var(--display);font-size:19px}
+.brand span{font-size:13px;color:var(--muted)}
+.rail h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--body);font-weight:700;padding:0 6px}
+.subs{display:flex;flex-direction:column;gap:4px}
+.sub{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;text-align:left;border:1px solid transparent;background:transparent;border-radius:10px;padding:10px 10px}
+.sub:hover{background:#fff;border-color:var(--line)}
+.sub[aria-current="true"]{background:#fff;border-color:var(--accent);box-shadow:0 1px 0 rgba(19,26,38,.03)}
+.sub .nm{font-weight:600;font-size:14.5px;line-height:1.35}
+.sub .ct{font-size:12.5px;color:var(--muted)}
+.sub .bar{grid-column:1/-1;height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+.sub .bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.sub.review .nm{color:var(--bad)}
+.topics{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px}
+.topic{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-weight:600;font-size:14px}
+.topic[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.next{font-size:13px;color:var(--muted);padding:0 6px;line-height:1.5}
+
+.main{padding:26px clamp(16px,4vw,48px) 64px;min-width:0}
+.col{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.stat b{display:block;font-family:var(--display);font-size:22px;line-height:1.15}
+.stat span{font-size:12.5px;color:var(--muted)}
+.head{display:flex;flex-direction:column;gap:6px}
+.head .crumb{font-size:13px;color:var(--muted);font-weight:600}
+.head h1{font-size:clamp(22px,3.4vw,29px)}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line)}
+.tab{border:0;background:transparent;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+
+.block{display:flex;flex-direction:column;gap:10px}
+.block h3{font-size:17px}
+.block p{margin:0;max-width:65ch}
+.story{border-left:3px solid var(--accent);padding:4px 0 4px 16px;display:flex;flex-direction:column;gap:10px}
+.list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.list li{border:1px solid var(--line);border-radius:10px;padding:10px 14px;max-width:70ch}
+.list.trick li{background:var(--accent-wash);border-color:transparent}
+.list.exam li{background:var(--warn-wash);border-color:transparent}
+.sheet{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+.sheet table{border-collapse:collapse;width:100%;min-width:620px;font-size:14.5px}
+.sheet th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--wash);padding:10px 12px}
+.sheet td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+.sheet td:first-child{font-weight:600;white-space:nowrap}
+.cta{align-self:flex-start;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-weight:700}
+.cta:hover{filter:brightness(1.08)}
+
+.palette{display:flex;flex-wrap:wrap;gap:6px}
+.pill{width:36px;height:34px;border-radius:8px;border:1px solid var(--line);background:#fff;font-weight:600;font-size:14px}
+.pill.ok{background:var(--good-wash);border-color:transparent;color:var(--good)}
+.pill.no{background:var(--bad-wash);border-color:transparent;color:var(--bad)}
+.pill.seen{background:var(--wash)}
+.pill[aria-current="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-wash)}
+
+.q{border:1px solid var(--line);border-radius:16px;padding:clamp(16px,3vw,26px);display:flex;flex-direction:column;gap:16px}
+.qmeta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font-size:12.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--wash);color:var(--muted)}
+.chip.clerk{background:var(--good-wash);color:var(--good)}
+.chip.po{background:var(--warn-wash);color:var(--warn)}
+.chip.warm,.chip.exp{background:var(--accent-wash);color:var(--accent)}
+.timer{margin-left:auto;font-weight:700;font-size:15px;color:var(--muted)}
+.common{background:var(--wash);border-radius:10px;padding:12px 14px;font-size:15px}
+.qtext{display:flex;flex-direction:column;gap:10px;font-size:17px;line-height:1.6}
+.qtext p{margin:0}
+.sts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:16px}
+.sts li{padding-left:12px;border-left:2px solid var(--line)}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 12px;font-size:16px}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt .k{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-wash)}
+.opt[aria-pressed="true"] .k{background:var(--accent);border-color:var(--accent);color:#fff}
+.opt.right{border-color:var(--good);background:var(--good-wash)}
+.opt.right .k{background:var(--good);border-color:var(--good);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-wash)}
+.opt.wrong .k{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt:disabled{cursor:default;color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 16px;font-weight:600}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.pri:hover:not(:disabled){color:#fff;filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.on{border-color:var(--warn);color:var(--warn);background:var(--warn-wash)}
+.sp{margin-left:auto}
+
+.verdict{border-radius:10px;padding:10px 14px;font-weight:600}
+.verdict.ok{background:var(--good-wash);color:var(--good)}
+.verdict.no{background:var(--bad-wash);color:var(--bad)}
+.verdict.skip{background:var(--wash);color:var(--muted)}
+.sol{display:flex;flex-direction:column;gap:14px}
+.panel{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.panel h4{margin:0;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.panel ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.panel.smart{background:var(--accent-wash);border-color:transparent}
+.panel.smart h4{color:var(--accent)}
+.panel.cue{background:var(--warn-wash);border-color:transparent}
+.panel.cue h4{color:var(--warn)}
+.panel p{margin:0}
+.note{font-size:13.5px;color:var(--muted)}
+.empty{border:1px dashed var(--line);border-radius:var(--r);padding:22px;color:var(--muted)}
+
+@media (max-width:860px){
+  .rail h2{display:none}
+  .app{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px 16px;gap:12px}
+  .rail h2,.next{display:none}
+  .subs{flex-direction:row;overflow-x:auto;gap:8px;padding-bottom:4px}
+  .sub{min-width:168px;background:#fff;border-color:var(--line)}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<style>
+/* Player additions: chapter library controls. Same tokens as the original page. */
+.lib{display:flex;flex-direction:column;gap:8px;padding:0 4px}
+.lib .row{gap:6px}
+.lib .btn{padding:7px 12px;font-size:13.5px}
+.libmsg{font-size:12.5px;color:var(--muted);padding:0 2px;line-height:1.45}
+.libmsg.err{color:var(--bad)}
+.welcome{display:flex;flex-direction:column;gap:14px}
+.welcome ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+@media (max-width:860px){.lib{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail">
+    <div class="brand"><b>Mains Quants Practice</b><span>Harshal PYQ + expected questions</span></div>
+    <h2>Topics</h2>
+    <div class="topics" id="topics"></div>
+    <h2>Sub-topics</h2>
+    <nav class="subs" id="subs" aria-label="Sub-topics"></nav>
+    <h2>Chapters</h2>
+    <div class="lib">
+      <div class="row">
+        <button class="btn" type="button" id="addBtn">+ JSON chapter serkka</button>
+        <button class="btn" type="button" id="delBtn">Indha chapter-a neekku</button>
+      </div>
+      <input type="file" id="fileIn" accept=".json,application/json" multiple hidden>
+      <p class="libmsg" id="libMsg"></p>
+    </div>
+  </aside>
+  <main class="main"><div class="col" id="view"></div></main>
+</div>
+
+<script>
+/* ===== Chapter library: JSON files in, TOPICS out =====
+   Chapter JSON shape: { id, name, subs:[{id,name,short,story[],rule[],tricks[],exam[],sheet?,sheetTitle?,sheetHead?}],
+                         qs:[{id,sub,src,lvl,common?,t[],st?,o[],a,n[],s[],c}], skipped }
+   A file may hold one chapter object or an array of them.
+   Same chapter id loaded twice = merged: subs with the same id combine their lists, questions with the same id appear once. */
+const TOPICS=[];
+const LIB_KEY="mqp.lib.v1";
+const Lib=(function(){
+  let stored=[];
+  try{const raw=localStorage.getItem(LIB_KEY);if(raw)stored=JSON.parse(raw)||[];}catch(e){stored=[];}
+  const persist=()=>{try{localStorage.setItem(LIB_KEY,JSON.stringify(stored));return true;}catch(e){return false;}};
+  const uniq=a=>{const seen=new Set(),out=[];(a||[]).forEach(x=>{const k=typeof x==="string"?x:JSON.stringify(x);if(!seen.has(k)){seen.add(k);out.push(x);}});return out;};
+
+  function mergeSub(a,b){
+    const m=Object.assign({},a,b);
+    ["story","rule","tricks","exam","sheet"].forEach(k=>{if(a[k]||b[k])m[k]=uniq([...(a[k]||[]),...(b[k]||[])]);});
+    m.name=a.name||b.name;m.short=a.short||b.short;
+    return m;
+  }
+  function mergeTopic(a,b){
+    const subs=a.subs.map(s=>Object.assign({},s));
+    b.subs.forEach(s=>{const i=subs.findIndex(x=>x.id===s.id);if(i<0)subs.push(s);else subs[i]=mergeSub(subs[i],s);});
+    const qs=a.qs.slice();
+    b.qs.forEach(q=>{const i=qs.findIndex(x=>x.id===q.id);if(i<0)qs.push(q);else qs[i]=q;});
+    const sk=uniq([a.skipped,b.skipped].filter(Boolean));
+    return {id:a.id,name:a.name||b.name,subs,qs,skipped:sk.join(" ")};
+  }
+  /* Check one chapter; drop broken questions instead of breaking the page. */
+  function clean(t){
+    if(!t||typeof t!=="object"||!t.id||!Array.isArray(t.subs)||!Array.isArray(t.qs))throw new Error("id, subs, qs illa");
+    const subIds=new Set(t.subs.map(s=>s.id));
+    t.subs.forEach(s=>["story","rule","tricks","exam"].forEach(k=>{if(!Array.isArray(s[k]))s[k]=[];}));
+    let dropped=0;
+    const qs=t.qs.filter(q=>{
+      const ok=q&&q.id&&subIds.has(q.sub)&&Array.isArray(q.t)&&Array.isArray(q.o)&&q.o.length>=2&&Number.isInteger(q.a)&&q.a>=0&&q.a<q.o.length;
+      if(!ok){dropped++;return false;}
+      q.src=q.src||"";q.lvl=q.lvl||"clerk";q.n=q.n||[];q.s=q.s||[];q.c=q.c||"";
+      if(typeof q.common==="string")q.common=[q.common];
+      return true;
+    });
+    return {topic:Object.assign({},t,{qs,name:t.name||t.id,skipped:t.skipped||""}),dropped};
+  }
+  function addTo(list,t){const i=list.findIndex(x=>x.id===t.id);if(i<0)list.push(t);else list[i]=mergeTopic(list[i],t);}
+  function rebuild(server){
+    TOPICS.length=0;
+    server.forEach(t=>addTo(TOPICS,t));
+    stored.forEach(t=>addTo(TOPICS,t));
+  }
+  let server=[];
+  return {
+    async boot(){
+      try{
+        const r=await fetch("chapters/index.json",{cache:"no-cache"});
+        if(!r.ok)throw 0;
+        const files=await r.json();
+        const got=await Promise.all(files.map(f=>fetch("chapters/"+f,{cache:"no-cache"}).then(x=>x.ok?x.json():null).catch(()=>null)));
+        got.forEach(d=>{if(!d)return;(Array.isArray(d)?d:[d]).forEach(t=>{try{server.push(clean(t).topic);}catch(e){}});});
+      }catch(e){server=[];}
+      rebuild(server);
+      return server.length;
+    },
+    importData(data){
+      const items=Array.isArray(data)?data:[data];let n=0,q=0,dropped=0;
+      items.forEach(t=>{const r=clean(t);addTo(stored,r.topic);n++;q+=r.topic.qs.length;dropped+=r.dropped;});
+      const saved=persist();rebuild(server);
+      return {n,q,dropped,saved};
+    },
+    remove(id){
+      const wasStored=stored.some(t=>t.id===id);
+      stored=stored.filter(t=>t.id!==id);persist();rebuild(server);
+      return {wasStored,stillServer:server.some(t=>t.id===id)};
+    }
+  };
+})();
+</script>
+<script>
+(function(){
+  const KEY="mqp.v1";
+  const LVL={clerk:"Clerk level",po:"PO level, kashtam",warm:"Warm-up"};
+  const EXAM=new Date(2026,11,27);
+  let T=null;
+  let mem={ans:{},flag:{},pos:{}};
+  try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);if(p&&p.ans)mem=Object.assign(mem,p);}}catch(e){}
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(mem));}catch(e){}};
+  const ui={sub:null,tab:"learn",qi:0,pick:null,t0:Date.now(),tick:null};
+
+  const $=s=>document.querySelector(s);
+  const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;};
+  const qsOf=sub=>sub==="review"?T.qs.filter(q=>(mem.ans[q.id]&&!mem.ans[q.id].ok)||mem.flag[q.id]):T.qs.filter(q=>q.sub===sub);
+  const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
+  const msg=(t,err)=>{const m=$("#libMsg");m.textContent=t||"";m.className="libmsg"+(err?" err":"");};
+
+  function restore(){
+    T=TOPICS.find(t=>mem.pos&&t.id===mem.pos.topic)||TOPICS[0]||null;
+    if(!T)return;
+    ui.sub=T.subs[0]?T.subs[0].id:null;ui.tab="learn";ui.qi=0;
+    if(mem.pos&&mem.pos.topic===T.id&&mem.pos.sub&&(mem.pos.sub==="review"||T.subs.some(s=>s.id===mem.pos.sub))){ui.sub=mem.pos.sub;ui.tab=mem.pos.tab||"learn";ui.qi=mem.pos.qi||0;}
+  }
+
+  function renderRail(){
+    const tp=$("#topics");tp.textContent="";
+    TOPICS.forEach(t=>{const b=el("button","topic",t.name);b.type="button";b.setAttribute("aria-current",String(t===T));
+      b.onclick=()=>{T=t;go(t.subs[0].id,"learn",0);};tp.append(b);});
+    const nav=$("#subs");nav.textContent="";
+    $("#delBtn").disabled=!T;
+    if(!T)return;
+    T.subs.forEach((s,i)=>{
+      const qs=qsOf(s.id),done=qs.filter(q=>mem.ans[q.id]).length;
+      const b=el("button","sub");b.type="button";b.setAttribute("aria-current",String(ui.sub===s.id));
+      b.append(el("span","nm",(i+1)+". "+s.name),el("span","ct num",done+"/"+qs.length));
+      const bar=el("span","bar"),fill=el("i");fill.style.width=(qs.length?done/qs.length*100:0)+"%";bar.append(fill);b.append(bar);
+      b.onclick=()=>go(s.id,"learn",0);nav.append(b);
+    });
+    const rv=qsOf("review");
+    const b=el("button","sub review");b.type="button";b.setAttribute("aria-current",String(ui.sub==="review"));
+    b.append(el("span","nm","Thirumba paaru"),el("span","ct num",String(rv.length)));
+    b.onclick=()=>go("review","practice",0);nav.append(b);
+  }
+
+  function go(sub,tab,qi){ui.sub=sub;ui.tab=tab;ui.qi=qi;ui.pick=null;mem.pos={topic:T.id,sub,tab,qi};save();render();window.scrollTo(0,0);}
+
+  function stats(){
+    const all=T.qs.map(q=>mem.ans[q.id]).filter(Boolean),tried=all.filter(a=>a.pick!=null);
+    const ok=tried.filter(a=>a.ok).length;
+    const avg=tried.length?tried.reduce((s,a)=>s+a.sec,0)/tried.length:0;
+    const days=Math.max(0,Math.ceil((EXAM-new Date())/864e5));
+    const wrap=el("div","stats");
+    [[all.length+"/"+T.qs.length,"Mudichadhu"],[tried.length?Math.round(ok/tried.length*100)+"%":"0%","Sariyaana %"],[tried.length?fmt(avg):"0:00","Sarasari neram"],[String(days),"Mains-ku naal"]]
+      .forEach(([v,l])=>{const s=el("div","stat");s.append(el("b","num",v),el("span",null,l));wrap.append(s);});
+    return wrap;
+  }
+
+  function welcome(v){
+    const w=el("section","welcome block");
+    w.append(el("h1",null,"Chapter innum load aagala"));
+    const ol=el("ol");
+    ["Keezha irukkura button-a amuthu, chapter JSON file-a (01_percentage.json maadhiri) thervu pannu. Oru thadavaila niraiya file thervu pannalaam.",
+     "Load aana chapter indha browser-laye save aagum. Adutha thadavai thirandhaa thirumba serkka vendaam.",
+     "Indha page-um chapters folder-um onna website-la (GitHub Pages maadhiri) pottaa, chapters/index.json-la irukkura ellaa chapter-um thaanaa load aagum."
+    ].forEach(t=>ol.append(el("li",null,t)));
+    w.append(ol);
+    const c=el("button","cta","JSON chapter serkka");c.type="button";c.onclick=()=>$("#fileIn").click();w.append(c);
+    v.append(w);
+  }
+
+  function render(){
+    clearInterval(ui.tick);
+    renderRail();
+    const v=$("#view");v.textContent="";
+    if(!T){welcome(v);return;}
+    v.append(stats());
+    const isRev=ui.sub==="review";
+    const sub=T.subs.find(s=>s.id===ui.sub)||T.subs[0];
+    if(!isRev)ui.sub=sub.id;
+    const head=el("div","head");
+    head.append(el("div","crumb",T.name),el("h1",null,isRev?"Thirumba paaru: thappa ponadhu, mark pannadhu":sub.name));
+    v.append(head);
+    if(!isRev){
+      const tabs=el("div","tabs");tabs.setAttribute("role","tablist");
+      [["learn","Kadhai & concept"],["practice","Practice ("+qsOf(ui.sub).length+")"]].forEach(([id,label])=>{
+        const t=el("button","tab",label);t.type="button";t.setAttribute("role","tab");t.setAttribute("aria-selected",String(ui.tab===id));
+        t.onclick=()=>go(ui.sub,id,ui.qi);tabs.append(t);
+      });
+      v.append(tabs);
+    }
+    if(!isRev&&ui.tab==="learn")learn(v,sub);else practice(v);
+  }
+
+  function learn(v,sub){
+    const blk=(title,items,cls)=>{
+      const b=el("section","block");b.append(el("h3",null,title));
+      if(cls==="story"){const s=el("div","story");items.forEach(p=>s.append(el("p",null,p)));b.append(s);}
+      else{const ul=el("ul","list "+cls);items.forEach(p=>ul.append(el("li",null,p)));b.append(ul);}
+      return b;
+    };
+    if(sub.story.length)v.append(blk("Kadhai",sub.story,"story"));
+    if(sub.sheet&&sub.sheet.length){
+      const b=el("section","block");b.append(el("h3",null,sub.sheetTitle||"Pattern cheat sheet"));
+      const w=el("div","sheet"),tb=el("table"),hd=el("tr");
+      (sub.sheetHead||["Vagai","Paatha udane adayaalam","Udhaaranam"]).forEach(h=>hd.append(el("th",null,h)));tb.append(hd);
+      sub.sheet.forEach(r=>{const tr=el("tr");r.forEach((c,i)=>tr.append(el("td",i===2?"num":null,c)));tb.append(tr);});
+      w.append(tb);b.append(w);v.append(b);
+    }
+    if(sub.rule.length)v.append(blk(sub.sheet?"Eppadi approach panradhu: 3 step":"Kadhai-la irundhu rule",sub.rule,"rule"));
+    if(sub.tricks.length)v.append(blk("Tricks",sub.tricks,"trick"));
+    if(sub.exam.length)v.append(blk("Exam-la eppadi approach panradhu",sub.exam,"exam"));
+    const c=el("button","cta","Practice aarambi");c.type="button";c.onclick=()=>go(ui.sub,"practice",0);v.append(c);
+    if(sub===T.subs[T.subs.length-1]&&T.skipped)v.append(el("p","note",T.skipped));
+  }
+
+  function practice(v){
+    const qs=qsOf(ui.sub);
+    if(!qs.length){v.append(el("div","empty",ui.sub==="review"?"Inga onnum illa. Thappa pona questions-um, nee mark panna questions-um inga varum.":"Questions illa."));return;}
+    if(ui.qi>=qs.length)ui.qi=qs.length-1;
+    const q=qs[ui.qi],rec=mem.ans[q.id];
+
+    const pal=el("div","palette");
+    qs.forEach((x,i)=>{
+      const r=mem.ans[x.id];
+      const p=el("button","pill num"+(r?(r.pick==null?" seen":r.ok?" ok":" no"):""),String(i+1));p.type="button";
+      p.setAttribute("aria-current",String(i===ui.qi));p.setAttribute("aria-label","Question "+(i+1));
+      p.onclick=()=>go(ui.sub,"practice",i);pal.append(p);
+    });
+    v.append(pal);
+
+    const card=el("article","q");
+    const meta=el("div","qmeta");
+    meta.append(el("span","chip","Q"+(ui.qi+1)+" / "+qs.length),el("span","chip"+(q.src.startsWith("Expected")?" exp":""),q.src),el("span","chip "+q.lvl,LVL[q.lvl]||q.lvl));
+    const tm=el("span","timer num",rec?fmt(rec.sec):"0:00");meta.append(tm);card.append(meta);
+    if(q.common){const c=el("div","common");q.common.forEach(p=>c.append(el("div",null,p)));card.append(c);}
+    const txt=el("div","qtext");q.t.forEach(p=>txt.append(el("p",null,p)));card.append(txt);
+    if(q.st){const ul=el("ul","sts");q.st.forEach(s=>ul.append(el("li",null,s)));card.append(ul);}
+
+    const opts=el("div","opts");
+    q.o.forEach((o,i)=>{
+      const b=el("button","opt");b.type="button";
+      b.append(el("span","k","ABCDE"[i]),el("span",null,o));
+      if(rec){b.disabled=true;if(i===q.a)b.classList.add("right");else if(rec.pick===i)b.classList.add("wrong");}
+      else{b.setAttribute("aria-pressed",String(ui.pick===i));b.onclick=()=>{ui.pick=i;[...opts.children].forEach((c,j)=>c.setAttribute("aria-pressed",String(j===i)));chk.disabled=false;};}
+      opts.append(b);
+    });
+    card.append(opts);
+
+    const row=el("div","row");
+    const chk=el("button","btn pri","Answer check pannu");chk.type="button";chk.disabled=ui.pick==null;
+    const giveup=el("button","btn","Theriyala, solution kaatu");giveup.type="button";
+    const flag=el("button","btn"+(mem.flag[q.id]?" on":""),mem.flag[q.id]?"Mark pannirukku":"Thirumba paakka mark pannu");flag.type="button";
+    flag.onclick=()=>{if(mem.flag[q.id])delete mem.flag[q.id];else mem.flag[q.id]=1;save();render();};
+    const done=pick=>{mem.ans[q.id]={pick,ok:pick===q.a,sec:Math.round((Date.now()-ui.t0)/1000)};ui.pick=null;save();render();};
+    chk.onclick=()=>done(ui.pick);giveup.onclick=()=>done(null);
+    if(!rec)row.append(chk,giveup);
+    else{const again=el("button","btn","Marupadiyum try pannu");again.type="button";again.onclick=()=>{delete mem.ans[q.id];save();ui.pick=null;render();};row.append(again);}
+    row.append(flag);
+    card.append(row);
+
+    if(rec){
+      const vd=el("div","verdict "+(rec.pick==null?"skip":rec.ok?"ok":"no"),
+        rec.pick==null?"Solution paathutta. Sariyaana answer: "+"ABCDE"[q.a]+". Naalaikku idha marupadiyum try pannu."
+        :rec.ok?"Sari. "+fmt(rec.sec)+" aachu."+(q.lvl!=="po"&&rec.sec>120?" Answer sari, aana 2 nimishathukku mela. Smart method paaru.":"")
+        :"Thappu. Sariyaana answer: "+"ABCDE"[q.a]+". Keezha enga maatuna nu paaru.");
+      card.append(vd);
+      const sol=el("div","sol");
+      const panel=(cls,title,items)=>{const p=el("section","panel "+cls);p.append(el("h4",null,title));
+        if(Array.isArray(items)){const ol=el("ol");items.forEach(s=>ol.append(el("li",null,s)));p.append(ol);}else p.append(el("p",null,items));return p;};
+      sol.append(panel("","Normal method",q.n),panel("smart","Smart method (exam-la idhu)",q.s),panel("cue","Indha type-a paatha udane",q.c));
+      card.append(sol);
+    }else{
+      ui.t0=Date.now();
+      ui.tick=setInterval(()=>{tm.textContent=fmt((Date.now()-ui.t0)/1000);},1000);
+    }
+    v.append(card);
+
+    const nav=el("div","row");
+    const prev=el("button","btn","Munnadi");prev.type="button";prev.disabled=ui.qi===0;prev.onclick=()=>go(ui.sub,"practice",ui.qi-1);
+    const next=el("button","btn"+(rec?" pri":"")+" sp","Adutha question");next.type="button";next.disabled=ui.qi===qs.length-1;next.onclick=()=>go(ui.sub,"practice",ui.qi+1);
+    nav.append(prev,next);v.append(nav);
+    if(q.lvl==="po"&&!rec)v.append(el("p","note","Idhu PO mains level. Clerk mains-ku kashtam adhigam. 3 nimishathula varalana solution paathu method-a mattum kathukko."));
+  }
+
+  /* Library controls */
+  $("#addBtn").onclick=()=>$("#fileIn").click();
+  $("#fileIn").onchange=async e=>{
+    const files=[...e.target.files];e.target.value="";
+    if(!files.length)return;
+    let added=0,qn=0,drop=0,bad=[],lastId=null,saved=true;
+    for(const f of files){
+      try{
+        const data=JSON.parse(await f.text());
+        const r=Lib.importData(data);added+=r.n;qn+=r.q;drop+=r.dropped;saved=saved&&r.saved;
+        lastId=(Array.isArray(data)?data[data.length-1]:data).id;
+      }catch(err){bad.push(f.name);}
+    }
+    if(lastId){T=TOPICS.find(t=>t.id===lastId)||TOPICS[0];ui.sub=T.subs[0].id;ui.tab="learn";ui.qi=0;mem.pos={topic:T.id,sub:ui.sub,tab:"learn",qi:0};save();}
+    let m=added?added+" chapter load aachu, "+qn+" questions.":"";
+    if(drop)m+=" "+drop+" question-la field kuraivu, vittutten.";
+    if(bad.length)m+=" Padikka mudiyala: "+bad.join(", ")+" (JSON sari illa).";
+    if(added&&!saved)m+=" Browser storage niranjiduchu, adutha thadavai thirumba serkkanum.";
+    msg(m.trim(),bad.length&&!added);
+    render();
+  };
+  $("#delBtn").onclick=()=>{
+    if(!T)return;
+    const r=Lib.remove(T.id);
+    if(!r.wasStored){msg("Idhu website-la irundhu varra chapter. chapters/index.json-la irundhu eduthaa dhaan pogum.",true);return;}
+    msg(r.stillServer?"Neenga serthadha neekkitten. Website version mattum irukku.":"Chapter neekkitten. Progress appadiye irukku, thirumba serthaa varum.");
+    T=TOPICS.find(t=>t.id===T.id)||TOPICS[0]||null;
+    if(T){ui.sub=T.subs[0].id;ui.tab="learn";ui.qi=0;}
+    render();
+  };
+
+  Lib.boot().then(n=>{
+    restore();
+    if(!TOPICS.length)msg("Chapter illa. JSON file-a serkka mela irukkura button-a amuthu.");
+    render();
+  });
+})();
+</script>
+</body>
+</html>
