@@ -149,6 +149,27 @@ h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.2}
   .sub{min-width:168px;background:#fff;border-color:var(--line)}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+@media (max-width:560px){
+  .main{padding:18px 12px 40px}
+  .col{gap:16px}
+  .brand b{font-size:17px}
+  .brand span{font-size:12px}
+  .topics{flex-wrap:nowrap;overflow-x:auto;padding:0 2px 4px}
+  .topic{flex:0 0 auto;padding:6px 10px;font-size:13px}
+  .sub{min-width:148px;padding:9px}
+  .stats{gap:8px}
+  .stat{padding:10px}
+  .stat b{font-size:20px}
+  .tabs{overflow-x:auto}
+  .tab{flex:0 0 auto;padding:10px 12px;white-space:nowrap}
+  .q{padding:14px;gap:14px}
+  .qtext{font-size:16px}
+  .timer{margin-left:0}
+  .row .sp{margin-left:0}
+  .lib .row{align-items:stretch}
+  .lib .row .btn{flex:1 1 140px}
+  .cta{align-self:stretch}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 <style>
